@@ -4,8 +4,10 @@ const cors = require('cors')
 
 const contactsRouter = require('./routes/api/contacts')
 
-const app = express()
-console.log(app)
+const app = express();
+
+app.get("/contacts")
+
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 
 app.use(logger(formatsLogger))
@@ -24,4 +26,3 @@ app.use((err, req, res, next) => {
 
 module.exports = app
 
-// fdngkndflkhdf
