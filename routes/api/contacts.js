@@ -1,6 +1,7 @@
 const express = require('express')
 const ContactsService = require("../../models/contacts.js");
-const { contactAddSchema } = require('./validation.js');
+const { contactAddSchema } = require('../../schemas/contact.js');
+const { HttpError } = require("../../helpers/HttpError.js");
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.get('/:contactId', async (req, res, next) => {
     const result = await ContactsService.getContactById(contactId);
 
     if (!result) {
-      return res.status(404).json({ message: "Not found" });
+      throw HttpError(404, "Not found");
     }
     res.json(result);
   } catch (error) {
@@ -31,8 +32,7 @@ router.post('/', async (req, res, next) => {
   try {
     const { error } = contactAddSchema.validate(req.body);
     if (error) {
-      console.log(error)
-      return res.status(400).json({ message: error.message });
+      throw HttpError(400, error.message);
     }
     const result = await ContactsService.addContact(req.body);
     return res.status(201).json(result)
@@ -45,9 +45,8 @@ router.delete('/:contactId', async (req, res, next) => {
    try {
      const { contactId } = req.params;
      const result = await ContactsService.removeContact(contactId);
-     console.log(result)
       if (!result) {
-            return res.status(404).json({ message: "Not found" });
+            throw HttpError(404, "Not found");
         }
       
         return res.status(200).json({"message": "contact deleted"});
@@ -59,19 +58,18 @@ router.delete('/:contactId', async (req, res, next) => {
 
 router.put('/:contactId', async (req, res, next) => {
   try {
-    if (!req.body) {
-      return res.status(404).json({ message: "Not found" });
+    if (JSON.stringify(req.body) === '{}') {
+      throw HttpError(400, "missing fields");
     }
     const { error } = contactAddSchema.validate(req.body);
     if (error) {
-      return res.status(400).json({ message: error.message});
+      throw HttpError(400, error.message);
     }
 
     const { contactId  } = req.params;
     const result = await ContactsService.updateContacts(contactId , req.body);
-    console.log(result)
     if (!result) {
-      return res.status(404).json({ message: "Not found" });
+     throw HttpError(404, "Not found");
     };
 
     return res.status(200).json(result)
@@ -80,4 +78,4 @@ router.put('/:contactId', async (req, res, next) => {
   }
 });
 
-module.exports = router
+module.exports = router;

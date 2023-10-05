@@ -1,5 +1,6 @@
 const fs = require('fs/promises');
 const path = require("path");
+const { nanoid } = require('nanoid');
 
 const contactsPath = path.resolve("models", "contacts.json");
 
@@ -31,7 +32,7 @@ const removeContact = async (contactId) => {
 const addContact = async ({ name, email, phone }) => {
   const contacts = await listContacts();
   const newContact = {
-    id: Math.random().toString(),
+    id: nanoid(),
     name,
     email,
     phone
@@ -42,7 +43,6 @@ const addContact = async ({ name, email, phone }) => {
 };
 
 const updateContacts = async (id, { name, email, phone }) => {
-  console.log(name, email, phone)
   const contacts = await listContacts();
   const index = contacts.findIndex(item => item.id === id);
   if (index === -1) {
