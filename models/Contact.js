@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const contactSchema = new mongoose.Schema({ 
     name: {
       type: String,
@@ -16,6 +17,11 @@ const contactSchema = new mongoose.Schema({
       default: false,
     },
 });
+
+contactSchema.post("save", (error, data, next) => {
+  error.status = 400;
+  next();
+})
 
 const Contact = mongoose.model("Contact", contactSchema);
 
