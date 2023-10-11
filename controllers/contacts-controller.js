@@ -1,48 +1,76 @@
-const Contact = require("../models/Contact");
+const { Contact } = require("../models/Contact");
+const HttpError = require("../helpers/HttpError");
+const ctrlWrapper = require("../decorators/crtlWrapper");
 
 const getAll = async (req, res) => {
-    const result = await Contact.find();
+    const result = await Contact.find({});
     res.json(result);
 };
 
+const getContactById = async (req, res) => {
+    const { contactId } = req.params;
+    const result = await Contact.findOne({ _id: contactId }).lean();
+    if (!result) {
+      throw HttpError(404, "Not found");
+    }
+      res.json(result);
+};
 
 const addContact = async (req, res) => {
+     if (!req.body) {
+      throw HttpError(400, error.message);
+    }
     const result = await Contact.create(req.body);
     res.status(201).json(result);
 };
 
+
+const updateContacts = async (req, res) => {
+    const { contactId } = req.params;
+     if (JSON.stringify(req.body) === '{}') {
+      throw HttpError(400, "missing fields");
+    }
+    const result = await Contact.findByIdAndUpdate(contactId, req.body);
+   if (!result) {
+     throw HttpError(404, "Not found");
+    };
+    res.json(result);
+};
+
+const updateStatusContact = async (req, res) => {
+    const { contactId } = req.params;
+     if (!req.body) {
+        throw HttpError(400, `missing field favorite`);
+    }
+    const result = await Contact.findByIdAndUpdate(contactId, req.body);
+    if (!result) {
+        throw HttpError(404, `Not found`);
+    }
+    res.json(result);
+};
+
+const deleteById = async (req,res) => {
+  const { contactId } = req.params;
+     const result = await Contact.findByIdAndDelete(contactId);
+      if (!result) {
+            throw HttpError(404, "Not found");
+        }
+      
+        return res.status(200).json({"message": "contact deleted"});
+};
+    
+
 module.exports = ({
-    getAll,
-    addContact
+     getAll: ctrlWrapper(getAll),
+    getContactById: ctrlWrapper(getContactById),
+    addContact: ctrlWrapper(addContact),
+    updateContacts: ctrlWrapper(updateContacts),
+    updateStatusContact: ctrlWrapper(updateStatusContact),
+    deleteById: ctrlWrapper(deleteById),
 })
 
-// const getContactById = async (contactId) => {
-//   const contact = await listContacts();
-//   const result = contact.find(item => item.id === contactId);
-//   return result ;
-// };
-
-// const removeContact = async (contactId) => {
-//   const contacts = await listContacts();
-//   const index = contacts.findIndex(item => item.id === contactId);
-//   if (index === -1) {
-//     return null;
-//   }
-    
-//   const [result] = contacts.splice(index, 1);
-//   await updateContact(contacts);
-//   return result;
-// };
 
 
-// const updateContacts = async (id, { name, email, phone }) => {
-//   const contacts = await listContacts();
-//   const index = contacts.findIndex(item => item.id === id);
-//   if (index === -1) {
-//     return null;
-//   }
-//   contacts[index] = { id, name, email, phone };
-//   await updateContact(contacts);
-//   return contacts[index];
-// };
-    
+
+
+

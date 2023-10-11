@@ -3,4 +3,13 @@ const handleSaveError = (error, data, next) => {
     next();
 };
 
-module.exports = handleSaveError;
+const runValidatorsAtUpdate = function (next) {
+    this.options.runValidators = true;
+    this.options.new = true;
+    next();
+};
+
+module.exports = ({
+    handleSaveError,
+    runValidatorsAtUpdate
+});

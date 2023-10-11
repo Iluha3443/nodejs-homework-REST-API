@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-
+const Joi = require('joi');
+const {handleSaveError, runValidatorsAtUpdate} = require("../models/hooks")
 
 const contactSchema = new mongoose.Schema({ 
     name: {
@@ -18,11 +19,28 @@ const contactSchema = new mongoose.Schema({
     },
 });
 
-contactSchema.post("save", (error, data, next) => {
-  error.status = 400;
-  next();
-})
+contactSchema.post("save", handleSaveError);
+
+contactSchema.pre("findOneAndUpdate", runValidatorsAtUpdate);
+
+contactSchema.post("findOneAndUpdate", handleSaveError);
+
+const contactAddSchema = Joi.object({
+  name: Joi.string().required().messages({ "any.required": "missing required name field" }),
+  email: Joi.string().required().messages({ "any.required": "missing required email field" }),
+  phone: Joi.string().required().messages({ "any.required": "missing required phone field" }),
+  favorite: Joi.boolean().messages({ "any.required": "missing required favorite field" }),
+});
+
+const contactUpdateFavoriteSchema = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
 
 const Contact = mongoose.model("Contact", contactSchema);
 
-module.exports = Contact;
+module.exports = {
+  Contact,
+  contactAddSchema,
+  contactUpdateFavoriteSchema
+};
