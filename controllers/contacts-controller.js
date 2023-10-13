@@ -24,7 +24,6 @@ const addContact = async (req, res) => {
     res.status(201).json(result);
 };
 
-
 const updateContacts = async (req, res) => {
     const { contactId } = req.params;
      if (JSON.stringify(req.body) === '{}') {
@@ -48,7 +47,6 @@ const updateStatusContact = async (req, res) => {
     }
     res.json(result);
 };
-
 
 
 const deleteById = async (req,res) => {
