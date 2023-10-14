@@ -1,8 +1,8 @@
-const mongoose = require("mongoose");
+const { Schema, model } = require('mongoose');
 const Joi = require('joi');
 const { handleSaveError, runValidatorsAtUpdate } = require("../models/hooks");
 
-const contactSchema = new mongoose.Schema({ 
+const contactSchema = new Schema({
     name: {
       type: String,
       required: [true, 'Set name for contact'],
@@ -16,8 +16,13 @@ const contactSchema = new mongoose.Schema({
     favorite: {
       type: Boolean,
       default: false,
-    },
-});
+  },
+     owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    }
+}
+);
 
 contactSchema.post("save", handleSaveError);
 
@@ -26,23 +31,20 @@ contactSchema.pre("findOneAndUpdate", runValidatorsAtUpdate);
 contactSchema.post("findOneAndUpdate", handleSaveError);
 
 const contactAddSchema = Joi.object({
-  name: Joi.string().required().messages({ "any.required": "missing required name field" }),
-  email: Joi.string().required().messages({ "any.required": "missing required email field" }),
-  phone: Joi.string().required().messages({ "any.required": "missing required phone field" }),
-  favorite: Joi.boolean().messages({ "any.required": "missing required favorite field" }),
-});
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    phone: Joi.string().required(),
+    favorite: Joi.boolean()
+})
 
-const contactUpdateFavoriteSchema = Joi.object({
-  favorite: Joi.boolean().required(),
-  name: Joi.string().optional(),
-  email: Joi.string().optional(),
-  phone: Joi.string().optional(),
-});
+const updateFavoriteSchema = Joi.object({
+    favorite: Joi.boolean().required()
+})
 
-const Contact = mongoose.model("Contact", contactSchema);
+const Contact = model('contact', contactSchema);
+const schemas = {updateFavoriteSchema, contactAddSchema}
 
 module.exports = {
+  schemas,
   Contact,
-  contactAddSchema,
-  contactUpdateFavoriteSchema
 };
