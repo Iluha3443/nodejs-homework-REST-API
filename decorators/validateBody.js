@@ -10,7 +10,7 @@ const validateBody = schema => {
             objectBody.length === 0 && missingField === 'favorite'
                 ? next(HttpError(400, `missing fields ${missingField}`))
             : objectBody.length === 0
-                ? next(HttpError(400, `missing fields`)) 
+                ? next(HttpError(400, `missing fields`))
                 : next(HttpError(400, `missing required ${missingField} field`));
         };
         next();

@@ -32,7 +32,7 @@ userSchema.post("findOneAndUpdate", handleSaveError);
 const userSignupSchema = Joi.object({
     password: Joi.string().required(),
     email: Joi.string().email().required(),
-    subscription: Joi.string().required(),
+    subscription: Joi.string(),
 });
 
 const userSigninSchema = Joi.object({
@@ -41,9 +41,9 @@ const userSigninSchema = Joi.object({
 });
 
 const User = model("user", userSchema);
-const schema = { userSignupSchema, userSigninSchema };
 
 module.exports = {
     User,
-    schema
+    userSignupSchema,
+    userSigninSchema
 };
