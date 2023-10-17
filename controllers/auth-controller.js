@@ -2,6 +2,10 @@ const { User } = require("../models/User");
 const HttpError = require("../helpers/HttpError");
 const ctrlWrapper = require("../decorators/crtlWrapper");
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+const {JWT_SECRET} = process.env;
 
 const signup = async (req, res) => {
      const { email, password } = req.body;
@@ -18,24 +22,47 @@ const signup = async (req, res) => {
 };
 
 const signin = async (req, res) => {
-     if (!req.body) {
-          throw HttpError(400)
-     };
-      const { email, password } = req.body;
+     const { email, password } = req.body;
      const user = await User.findOne({ email });
      if (!user) {
           throw HttpError(401, "Email or password is wrong")
      };
      const passwordCompare = await bcrypt.compare(password, user.password)
-      if (!passwordCompare) {
+     if (!passwordCompare) {
           throw HttpError(401, "Email or password is wrong")
      };
-     const token = 'djkgndfkjnhdfknhf';
-     res.json(token)
-}
+
+     const payload = {
+          id: user.id
+     };
+
+     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '20h' });
+     await User.findByIdAndUpdate(user.id, { token });
+     
+     res.json({ token })
+};
+
+const getCurrent = async (req, res) => {
+     const { subscription, email } = req.user;
+
+     res.json({
+          subscription,
+          email,
+     });
+};
+
+const signout = async (req, res) => {
+     const {_id} = req.user;
+     await User.findByIdAndUpdate(_id, { token: "" });
+     
+     res.status(204)
+};
+
 
 
 module.exports = ({
      signup: ctrlWrapper(signup),
      signin: ctrlWrapper(signin),
+     getCurrent: ctrlWrapper(getCurrent),
+     signout: ctrlWrapper(signout),
 });
