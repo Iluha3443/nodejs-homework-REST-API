@@ -4,7 +4,8 @@ const isEmptyBody = require("../../middlewares/isEmptyBody");
 const isValidId = require("../../middlewares/isValidId");
 const validateBody = require("../../decorators/validateBody");
 const { schemas } = require('../../models/Contact');
-const authenticate = require('../../middlewares/authenticate')
+const authenticate = require('../../middlewares/authenticate');
+const upload = require('../../middlewares/upload');
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.get('/', ContactsService.getAll);
 
 router.get('/:contactId', isValidId, ContactsService.getContactById);
 
-router.post('/', ContactsService.addContact);
+router.post('/', upload.single("poster"), isEmptyBody, validateBody(schemas.addSchema), ContactsService.addContact);
 
 router.delete('/:contactId', isValidId, ContactsService.deleteById)
 
