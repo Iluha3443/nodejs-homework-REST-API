@@ -3,9 +3,10 @@ const HttpError = require("../helpers/HttpError");
 const ctrlWrapper = require("../decorators/crtlWrapper");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const gravatar = require('gravatar');
 require('dotenv').config();
 
-const {JWT_SECRET} = process.env;
+const { JWT_SECRET } = process.env;
 
 const signup = async (req, res) => {
      const { email, password } = req.body;
@@ -13,11 +14,14 @@ const signup = async (req, res) => {
      if (emailUser) {
           throw HttpError(409, "Email in use")
      };
+     // const gravatarURL = gravatar.url(email);
+     const gravatarURL = `https://www.gravatar.com/avatar/${email}?s=200`;
      const hashPassword = await bcrypt.hash(password, 10);
-     const user = await User.create({ ...req.body, password: hashPassword });
+     const user = await User.create({ ...req.body, password: hashPassword, avatarURL: gravatarURL });
      res.status(201).json({
           email: user.email,
-          subscription: user.subscription
+          subscription: user.subscription,
+          avatarURL: gravatarURL
      });
 };
 

@@ -4,6 +4,7 @@ const isEmptyBody = require("../../middlewares/isEmptyBody");
 const validateBody = require("../../decorators/validateBody");
 const { userSignupSchema, userSigninSchema } = require('../../models/User');
 const authenticate = require('../../middlewares/authenticate')
+// const upload = require('../../middlewares/upload');
 
 const authRouter = express.Router();
 
