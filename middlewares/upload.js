@@ -1,7 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 
-const destination = path.resolve('public/avatars');
+const destination = path.resolve('tmp');
 
 const storage = multer.diskStorage({
     destination,
@@ -26,7 +26,6 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage,
     limits,
-    // fileFilter,
 });
 
 module.exports = upload;

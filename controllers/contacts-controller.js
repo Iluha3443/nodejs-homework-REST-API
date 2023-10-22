@@ -2,9 +2,6 @@ const { Contact } = require("../models/Contact");
 const HttpError = require("../helpers/HttpError");
 const ctrlWrapper = require("../decorators/crtlWrapper");
 const fs = require('fs/promises');
-const path = require('path');
-
-const postersPath = path.resolve("public", "avatars");
 
 const getAll = async (req, res) => {
   const { _id: owner } = req.user;
