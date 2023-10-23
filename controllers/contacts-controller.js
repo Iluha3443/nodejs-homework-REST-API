@@ -1,6 +1,7 @@
 const { Contact } = require("../models/Contact");
 const HttpError = require("../helpers/HttpError");
 const ctrlWrapper = require("../decorators/crtlWrapper");
+const fs = require('fs/promises');
 
 const getAll = async (req, res) => {
   const { _id: owner } = req.user;
@@ -24,12 +25,12 @@ const getContactById = async (req, res) => {
 };
 
 const addContact = async (req, res) => {
+  if (!req.body) {
+    throw HttpError(400, error.message);
+  }
   const { _id: owner } = req.user;
-     if (!req.body) {
-      throw HttpError(400, error.message);
-    }
   const result = await Contact.create({ ...req.body, owner });
-    res.status(201).json(result);
+  res.status(201).json(result);
 };
 
 const updateContacts = async (req, res) => {
