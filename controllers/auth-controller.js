@@ -8,8 +8,10 @@ require('dotenv').config();
 const Jimp = require("jimp");
 const fs = require('fs/promises');
 const path = require('path');
+const sendEmail = require('../helpers/sendEmail');
+const {nanoid} = require("nanoid");
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, BASE_URL } = process.env;
 
 const signup = async (req, res) => {
      const { email, password } = req.body;
@@ -17,9 +19,16 @@ const signup = async (req, res) => {
      if (emailUser) {
           throw HttpError(409, "Email in use")
      };
+     const verificationCode = nanoid();
      const gravatarURL = `https://www.gravatar.com/avatar/${email}?s=200`;
      const hashPassword = await bcrypt.hash(password, 10);
-     const user = await User.create({ ...req.body, password: hashPassword, avatarURL: gravatarURL });
+     const user = await User.create({ ...req.body, password: hashPassword, avatarURL: gravatarURL, verificationToken: verificationCode });
+    const verifyEmail = {
+        to: email,
+        subject: "Verify email",
+        html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationCode}">Click to verify email</a>`
+    }
+    await sendEmail(verifyEmail);
      res.status(201).json({
           email: user.email,
           subscription: user.subscription,
@@ -32,6 +41,9 @@ const signin = async (req, res) => {
      if (!user) {
           throw HttpError(401, "Email or password is wrong")
      };
+     if (!user.verify) {
+           throw HttpError(401, "User is not verify")
+     }
      const passwordCompare = await bcrypt.compare(password, user.password)
      if (!passwordCompare) {
           throw HttpError(401, "Email or password is wrong")
