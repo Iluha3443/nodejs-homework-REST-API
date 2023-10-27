@@ -19,14 +19,14 @@ const signup = async (req, res) => {
      if (emailUser) {
           throw HttpError(409, "Email in use")
      };
-     const verificationCode = nanoid();
+     const verificationToken = nanoid();
      const gravatarURL = `https://www.gravatar.com/avatar/${email}?s=200`;
      const hashPassword = await bcrypt.hash(password, 10);
-     const user = await User.create({ ...req.body, password: hashPassword, avatarURL: gravatarURL, verificationToken: verificationCode });
+     const user = await User.create({ ...req.body, password: hashPassword, avatarURL: gravatarURL, verificationToken });
     const verifyEmail = {
         to: email,
         subject: "Verify email",
-        html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationCode}">Click to verify email</a>`
+        html: `<a target="_blank" href="${BASE_URL}/api/users/verify/${verificationToken}">Click to verify email</a>`
     }
     await sendEmail(verifyEmail);
      res.status(201).json({
@@ -48,14 +48,11 @@ const signin = async (req, res) => {
      if (!passwordCompare) {
           throw HttpError(401, "Email or password is wrong")
      };
-
      const payload = {
           id: user.id
      };
-
      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '20h' });
      await User.findByIdAndUpdate(user.id, { token });
-     
      const response = {
           token,
           user: {
@@ -97,18 +94,18 @@ const updateAvatar = async (req, res) => {
 };
 
 const verify = async (req, res) => {
-     const { verificationToken  } = req.params;
-     const user = await User.findOne({ verificationToken  });
-     if (!user) {
-          throw HttpError(404, 'User not found')
-     }
+    const { verificationToken } = req.params;
+    const user = await User.findOne({ verificationToken });
+    if (!user) {
+        throw HttpError(404)
+    }
 
-     await User.findByIdAndUpdate(user._id, { verify: true, verificationToken : null });
+    await User.findByIdAndUpdate(user._id, { verify: true, verificationToken: "" });
 
-     res.json({
-          message: 'Verification successful'
-     })
-};
+    res.json({
+        message: "Verify success"
+    })
+}
 
 const resendVerifyEmail = async (req, res) => {
      const { email } = req.body;

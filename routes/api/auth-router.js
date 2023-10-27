@@ -22,7 +22,7 @@ authRouter.post('/logout', authenticate, UserService.signout);
 
 authRouter.patch('/avatars', authenticate, upload.single("avatar"), UserService.updateAvatar);
 
-authRouter.get("/verify/:verificationCode", UserService.verify);
+authRouter.get("/verify/:verificationToken", UserService.verify);
 
 authRouter.post("/verify", isEmptyBody, userEmailValidate, UserService.resendVerifyEmail);
 
